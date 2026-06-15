@@ -1,0 +1,25 @@
+{
+  "name": "tokenlens",
+  "version": "0.0.1",
+  "description": "FinOps voor LLM's — cost-attribution per klant/feature/team voor OpenAI & Anthropic.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "keywords": ["llm", "finops", "cost", "openai", "anthropic", "token", "attribution", "observability"],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
