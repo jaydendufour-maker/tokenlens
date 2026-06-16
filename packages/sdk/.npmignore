@@ -1,0 +1,5 @@
+# Geen testartefacten in het gepubliceerde pakket
+dist/**/*.test.js
+dist/**/*.test.d.ts
+src
+tsconfig.json

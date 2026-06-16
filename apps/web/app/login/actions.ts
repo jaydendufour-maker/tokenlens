@@ -9,7 +9,7 @@ export async function login(formData: FormData) {
   const sb = await createServerSupabase();
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) redirect("/login?error=" + encodeURIComponent(error.message));
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function signup(formData: FormData) {

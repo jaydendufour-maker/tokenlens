@@ -1,7 +1,7 @@
 {
-  "name": "tokenlens",
-  "version": "0.0.1",
-  "description": "FinOps voor LLM's — cost-attribution per klant/feature/team voor OpenAI & Anthropic.",
+  "name": "tokenlens-sdk",
+  "version": "0.1.0",
+  "description": "FinOps for LLMs — cost attribution per customer/feature/team for OpenAI & Anthropic.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,11 +14,24 @@
   "files": ["dist", "README.md"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "node --test",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "test": "tsc -p tsconfig.json && node --test dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run build"
   },
   "keywords": ["llm", "finops", "cost", "openai", "anthropic", "token", "attribution", "observability"],
   "license": "MIT",
+  "homepage": "https://github.com/USER/tokenlens",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/USER/tokenlens.git",
+    "directory": "packages/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/USER/tokenlens/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "typescript": "^5.5.0"
   }

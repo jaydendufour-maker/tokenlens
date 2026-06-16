@@ -15,3 +15,20 @@ export async function getProjects(): Promise<Project[]> {
     .order("created_at", { ascending: true });
   return data ?? [];
 }
+
+export type Plan = "free" | "pro";
+
+/** Plan van de ingelogde user. Degradeert naar 'free' als er geen rij/tabel is. */
+export async function getPlan(): Promise<Plan> {
+  const sb = await createServerSupabase();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  if (!user) return "free";
+  const { data } = await sb
+    .from("profiles")
+    .select("plan")
+    .eq("id", user.id)
+    .maybeSingle();
+  return data?.plan === "pro" ? "pro" : "free";
+}

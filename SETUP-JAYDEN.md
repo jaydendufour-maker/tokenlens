@@ -5,9 +5,10 @@ Alles is gebouwd. Dit is puur klikwerk om het op je eigen machine te draaien en 
 ## 1. Supabase-project (gratis)
 1. Ga naar https://supabase.com → **New project** (gratis tier).
 2. Wacht tot 'ie klaar is → **SQL Editor** → **New query**.
-3. Plak en run de twee migraties (in volgorde):
+3. Plak en run de drie migraties (in volgorde):
    - `supabase/migrations/0001_init.sql`
    - `supabase/migrations/0002_aggregations.sql`
+   - `supabase/migrations/0003_alert_spend.sql`
 4. **Auth → Providers → Email:** zet "Confirm email" **uit** (makkelijker dogfooden).
 
 ## 2. Keys instellen
@@ -21,6 +22,11 @@ Alles is gebouwd. Dit is puur klikwerk om het op je eigen machine te draaien en 
    NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
    SUPABASE_URL=<project url>
    SUPABASE_SERVICE_ROLE_KEY=<service role key>
+   # voor budget-alerts (stap 5) — verzin zelf een lang geheim:
+   CRON_SECRET=<willekeurig-lang-geheim>
+   # optioneel: e-mail-alerts via Resend (gratis tot 3.000/mnd)
+   RESEND_API_KEY=<resend key, mag leeg>
+   RESEND_FROM=TokenLens <alerts@tokenlens.dev>
    ```
 
 ## 3. Draaien
@@ -28,14 +34,16 @@ Alles is gebouwd. Dit is puur klikwerk om het op je eigen machine te draaien en 
 cd apps/web
 npm run dev
 ```
-→ open http://localhost:3000 → **Account maken** → log in → **Projecten** → maak een
-project → **kopieer de API-key** (wordt één keer getoond).
+→ open http://localhost:3000 → je ziet nu de **publieke landingspagina** (de plek
+waar je later bezoekers heen stuurt). Klik **Get your free API key** → **Account maken**
+→ log in → je komt op **/dashboard** → **Projecten** → maak een project →
+**kopieer de API-key** (wordt één keer getoond).
 
 ## 4. Dogfooden op JARVIS / je bots
 Installeer de SDK (lokaal pad voor nu) en wrap je LLM-calls:
 
 ```ts
-import { configure, httpSink, track } from "tokenlens";
+import { configure, httpSink, track } from "tokenlens-sdk";
 
 configure({
   sink: httpSink({
@@ -55,7 +63,19 @@ const res = await track(
 Roep aan het eind `await flush()` aan zodat de laatste batch verstuurd wordt.
 Ververs het dashboard → je ziet kosten per klant/feature/model + per dag.
 
+## 5. Budget-alerts gebruiken (nieuw — gebouwd)
+1. In het dashboard: tab **Alerts** → maak een alert (project/klant/feature/team,
+   drempel in USD, per dag of maand, e-mail en/of webhook).
+2. De alerts worden gecheckt door een cron die dit endpoint aanroept:
+   ```
+   GET http://localhost:3000/api/cron/check-alerts?token=<CRON_SECRET>
+   ```
+   - Lokaal testen: open die URL in je browser → je krijgt `{ok, checked, triggered}`.
+   - In productie: zet een gratis cron (cron-job.org) die elk uur die URL aanroept.
+3. E-mail werkt zodra `RESEND_API_KEY` gezet is; webhooks werken altijd.
+   Een alert vuurt **max één keer per periode** (geen spam).
+
 ## Later (deploy naar productie)
-- Vercel-deploy van `apps/web` + dezelfde env-vars.
+- Vercel-deploy van `apps/web` + dezelfde env-vars (incl. `CRON_SECRET`).
 - SDK publiceren op npm (`npm publish` in `packages/sdk`).
-- Budget-alerts (cron) + email/webhook — nog te bouwen.
+- Domein + publieke GitHub-repo → de plekken waar je verkeer heen stuurt.

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getProjects } from "@/lib/data";
+import { getProjects, getPlan } from "@/lib/data";
 import { usd, num } from "@/lib/format";
+import { LockedBreakdown } from "@/components/upgrade";
 
 interface DimRow {
   label: string;
@@ -78,28 +79,37 @@ export default async function Overview({
 
   const project =
     projects.find((p) => p.id === projectParam) ?? projects[0];
+  // eslint-disable-next-line react-hooks/purity -- server component: huidige tijd is bedoeld
   const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
   const sb = await createServerSupabase();
+  const plan = await getPlan();
+  const isPro = plan === "pro";
 
-  const [summary, ts, byCustomer, byFeature, byModel] = await Promise.all([
+  // KPI's + grafiek zijn gratis (de teaser). De breakdown is Pro-only.
+  const [summary, ts] = await Promise.all([
     sb.rpc("cost_summary", { p_project: project.id, p_since: since }),
     sb.rpc("cost_timeseries", { p_project: project.id, p_since: since }),
-    sb.rpc("cost_by_dimension", {
-      p_project: project.id,
-      p_since: since,
-      p_dim: "customer",
-    }),
-    sb.rpc("cost_by_dimension", {
-      p_project: project.id,
-      p_since: since,
-      p_dim: "feature",
-    }),
-    sb.rpc("cost_by_dimension", {
-      p_project: project.id,
-      p_since: since,
-      p_dim: "model",
-    }),
   ]);
+
+  const [byCustomer, byFeature, byModel] = isPro
+    ? await Promise.all([
+        sb.rpc("cost_by_dimension", {
+          p_project: project.id,
+          p_since: since,
+          p_dim: "customer",
+        }),
+        sb.rpc("cost_by_dimension", {
+          p_project: project.id,
+          p_since: since,
+          p_dim: "feature",
+        }),
+        sb.rpc("cost_by_dimension", {
+          p_project: project.id,
+          p_since: since,
+          p_dim: "model",
+        }),
+      ])
+    : [null, null, null];
 
   const s = (summary.data?.[0] as
     | { total_cost: number; total_events: number; total_tokens: number }
@@ -119,7 +129,7 @@ export default async function Overview({
             {projects.map((p) => (
               <Link
                 key={p.id}
-                href={`/?project=${p.id}`}
+                href={`/dashboard?project=${p.id}`}
                 className={`text-xs rounded-full px-3 py-1 border ${
                   p.id === project.id
                     ? "bg-neutral-100 text-neutral-900 border-neutral-100"
@@ -163,20 +173,24 @@ export default async function Overview({
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <DimTable
-          title="Top klanten"
-          rows={(byCustomer.data as DimRow[] | null) ?? []}
-        />
-        <DimTable
-          title="Top features"
-          rows={(byFeature.data as DimRow[] | null) ?? []}
-        />
-        <DimTable
-          title="Per model"
-          rows={(byModel.data as DimRow[] | null) ?? []}
-        />
-      </div>
+      {isPro ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <DimTable
+            title="Top klanten"
+            rows={(byCustomer?.data as DimRow[] | null) ?? []}
+          />
+          <DimTable
+            title="Top features"
+            rows={(byFeature?.data as DimRow[] | null) ?? []}
+          />
+          <DimTable
+            title="Per model"
+            rows={(byModel?.data as DimRow[] | null) ?? []}
+          />
+        </div>
+      ) : (
+        <LockedBreakdown />
+      )}
     </div>
   );
 }

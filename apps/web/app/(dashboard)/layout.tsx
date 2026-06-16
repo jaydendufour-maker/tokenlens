@@ -19,12 +19,15 @@ export default async function DashboardLayout({
       <header className="border-b border-neutral-800">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/" className="font-semibold tracking-tight">
+            <Link href="/dashboard" className="font-semibold tracking-tight">
               TokenLens
             </Link>
             <nav className="flex items-center gap-4 text-sm text-neutral-400">
-              <Link href="/" className="hover:text-neutral-100">
+              <Link href="/dashboard" className="hover:text-neutral-100">
                 Overzicht
+              </Link>
+              <Link href="/alerts" className="hover:text-neutral-100">
+                Alerts
               </Link>
               <Link href="/projects" className="hover:text-neutral-100">
                 Projecten

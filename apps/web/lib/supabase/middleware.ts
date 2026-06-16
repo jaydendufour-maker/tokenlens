@@ -5,6 +5,27 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // Alleen de app-routes vereisen login. Marketing-/SEO-pagina's zijn publiek.
+  const path = request.nextUrl.pathname;
+  const isProtected =
+    path.startsWith("/dashboard") ||
+    path.startsWith("/alerts") ||
+    path.startsWith("/projects");
+
+  // Supabase nog niet geconfigureerd? Publieke site werkt gewoon;
+  // app-routes sturen we dan naar /login (i.p.v. een 500).
+  const configured =
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!configured) {
+    if (isProtected) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -28,13 +49,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-  const isPublic =
-    path.startsWith("/login") ||
-    path.startsWith("/auth") ||
-    path.startsWith("/api");
-
-  if (!user && !isPublic) {
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
