@@ -10,7 +10,8 @@ export async function updateSession(request: NextRequest) {
   const isProtected =
     path.startsWith("/dashboard") ||
     path.startsWith("/alerts") ||
-    path.startsWith("/projects");
+    path.startsWith("/projects") ||
+    path.startsWith("/upgrade");
 
   // Supabase nog niet geconfigureerd? Publieke site werkt gewoon;
   // app-routes sturen we dan naar /login (i.p.v. een 500).

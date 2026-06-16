@@ -18,7 +18,7 @@ export function UpgradeGate({
         {description}
       </p>
       <Link
-        href="/pricing"
+        href="/upgrade"
         className="inline-block mt-5 rounded-md bg-white text-neutral-900 text-sm font-medium px-5 py-2 hover:bg-neutral-200"
       >
         Upgrade naar Pro — {PRICE}
@@ -75,7 +75,7 @@ export function LockedBreakdown() {
             De breakdown per klant, feature en model is een Pro-feature.
           </p>
           <Link
-            href="/pricing"
+            href="/upgrade"
             className="inline-block mt-4 rounded-md bg-white text-neutral-900 text-sm font-medium px-5 py-2 hover:bg-neutral-200"
           >
             Upgrade naar Pro — {PRICE}

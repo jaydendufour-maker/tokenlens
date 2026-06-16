@@ -48,17 +48,46 @@ npm publish          # bouwt automatisch (prepublishOnly) en publiceert publiek
    ```
 
 ## 5. Betalingen aanzetten (Pro $29/mo) — $0 vooraf, % per verkoop
-De plan-gating staat al (account = `free`/`pro` in `profiles`; dashboard-breakdown +
-alerts zitten achter `pro`, ook server-side afgedwongen). Wat nog moet:
-1. Account bij **Paddle** of **LemonSqueezy** (merchant-of-record → regelt BTW + TH/Payoneer-payout, $0 vooraf).
-2. Maak een product "TokenLens Pro — $29/mo".
-3. Webhook `checkout.completed` → endpoint dat `update profiles set plan='pro' where id=<user>`
-   zet (via service_role). *(Dit endpoint is nog niet gebouwd — kleine klus zodra je de provider kiest.)*
+De code is **al gebouwd**: twee rails (crypto + kaart) → dezelfde idempotente,
+signature-geverifieerde unlock. Plan-gating (`profiles.plan` + `plan_expires_at`)
+staat en wordt server-side afgedwongen. Je hoeft alleen accounts te koppelen.
 
-**Tot dat af is** kun je handmatig iemand op Pro zetten (bv. jezelf om te dogfooden):
-in de Supabase SQL Editor:
+### 5a. Crypto — NOWPayments (geld direct in je wallet)
+1. Account op https://nowpayments.io → voeg je **wallet-adres** toe (bv. USDC/USDT).
+2. **Settings → API keys** → kopieer de API-key.
+3. **Settings → IPN** → zet een **IPN secret** + callback-URL
+   `https://<jouw-site>/api/billing/nowpayments`.
+4. Op de VM in `~/tokenlens/.env`:
+   ```
+   NOWPAYMENTS_API_KEY=<api key>
+   NOWPAYMENTS_IPN_SECRET=<ipn secret>
+   ```
+   → `sudo systemctl restart tokenlens`. De crypto-knop op `/upgrade` werkt nu.
+
+### 5b. Kaart — LemonSqueezy (uitbetaling naar je Wise)
+1. Account op https://lemonsqueezy.com → store aanmaken. **Check bij aanmelden dat
+   Thailand in de payout-landen zit** (bank-route → vul je **Wise USD account-details**
+   in; $50 min payout, 1% fee). *(Zit TH er niet bij → gebruik Paddle, zie onder.)*
+2. Maak een **subscription-product** "TokenLens Pro" à **$29/mo** → kopieer de
+   **checkout-link**.
+3. **Settings → Webhooks** → URL `https://<jouw-site>/api/billing/lemonsqueezy`,
+   selecteer de `subscription_*`-events, zet een **signing secret**.
+4. In `~/tokenlens/.env`:
+   ```
+   LEMONSQUEEZY_WEBHOOK_SECRET=<signing secret>
+   NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL=<checkout-link>
+   ```
+   → restart. De kaart-knop op `/upgrade` werkt nu (user-id gaat automatisch mee).
+
+> **Paddle-fallback** (als LemonSqueezy geen TH-payout doet): Paddle betaalt
+> gegarandeerd naar Wise (SWIFT/IBAN), $100 min + ~$15 SWIFT-fee. De webhook-handler
+> is provider-agnostisch; een Paddle-route toevoegen is een kleine klus.
+
+### Handmatig iemand op Pro zetten (dogfooden / vóór de rails live zijn)
+In de Supabase SQL Editor:
 ```sql
-update public.profiles set plan = 'pro' where id = '<jouw-user-id>';
+update public.profiles set plan = 'pro', plan_expires_at = null
+where id = '<jouw-user-id>';
 ```
 
 ---

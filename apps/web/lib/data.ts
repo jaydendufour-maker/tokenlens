@@ -27,8 +27,12 @@ export async function getPlan(): Promise<Plan> {
   if (!user) return "free";
   const { data } = await sb
     .from("profiles")
-    .select("plan")
+    .select("plan, plan_expires_at")
     .eq("id", user.id)
     .maybeSingle();
-  return data?.plan === "pro" ? "pro" : "free";
+  if (data?.plan !== "pro") return "free";
+  // verlopen abonnement → terug naar free
+  if (data.plan_expires_at && new Date(data.plan_expires_at) < new Date())
+    return "free";
+  return "pro";
 }
