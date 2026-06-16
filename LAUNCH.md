@@ -10,9 +10,28 @@ Volgorde: 1 → 2 maakt het dashboard live. 3 → 4 maakt de SDK + repo publiek.
 ## 1. Supabase koppelen (dashboard live) — gratis
 1. https://supabase.com → **New project** (free tier).
 2. **SQL Editor → New query** → plak heel `supabase/schema.sql` → **Run**.
-   (Dat is alle 4 de migraties in één keer, incl. `profiles` voor free/pro.)
-3. **Auth → Providers → Email** → "Confirm email" **uit** (makkelijker dogfooden).
-4. **Settings → API** → kopieer: Project URL, `anon` key, `service_role` key.
+   (Alle migraties 0001-0005 in één keer, incl. `profiles` + `payments`.)
+3. **Settings → API** → kopieer: Project URL, `anon` key, `service_role` key.
+
+### 1b. Auth correct zetten (signup + verificatiemail die werkt)
+4. **Authentication → URL Configuration:**
+   - **Site URL:** `https://agentauditor-jd.duckdns.org`
+   - **Redirect URLs** (toevoegen): `https://agentauditor-jd.duckdns.org/auth/confirm`
+     en `https://agentauditor-jd.duckdns.org/**`
+5. **Authentication → Providers → Email:** "Confirm email" **AAN** (we willen verificatie).
+6. **Authentication → Email Templates → "Confirm signup"** → vervang de link door:
+   ```html
+   <h2>Bevestig je TokenLens-account</h2>
+   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup&next=/dashboard">Bevestig mijn account</a></p>
+   ```
+   (De `/auth/confirm`-route is al gebouwd en zet de sessie + stuurt door naar het dashboard.)
+7. **E-mail-aflevering** (zodat de mail écht aankomt, niet in spam):
+   - **Nu/gratis:** Supabase's ingebouwde mail werkt meteen, maar is **gelimiteerd
+     (~2-4/uur, testniveau)** — prima om te dogfooden en eerste users.
+   - **Voor echt (aanraders bij groei):** **Authentication → SMTP Settings** → eigen
+     SMTP via **Resend** (gratis tot 3.000/mnd). Vereist een **eigen verzend-domein**
+     (DKIM/SPF) → daarvoor heb je een echt domein nodig (~$10/jr, bv. `tokenlens.dev`).
+     Dat lost meteen ook de nette URL op. Tot dan: ingebouwde mail.
 
 ## 2. Keys op de VM zetten + herstarten
 Op de VM staat `~/tokenlens/.env` (nu zonder Supabase). Vul aan:

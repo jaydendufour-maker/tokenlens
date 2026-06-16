@@ -23,8 +23,8 @@ export default async function LoginPage({
           )}
           {check_email && (
             <p className="text-sm text-emerald-400 bg-emerald-950/40 rounded-md px-3 py-2">
-              Account aangemaakt — bevestig je e-mail (of zet e-mailbevestiging
-              uit in Supabase) en log in.
+              Account aangemaakt — we hebben je een verificatiemail gestuurd.
+              Klik op de link erin om je account te bevestigen en in te loggen.
             </p>
           )}
           <input
