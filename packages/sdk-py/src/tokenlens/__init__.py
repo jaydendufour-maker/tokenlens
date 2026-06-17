@@ -20,6 +20,7 @@ from .client import (
     flush,
     record,
     track,
+    tracked,
 )
 from .pricing import DEFAULT_PRICING, ModelPrice, cost_usd, price_for
 from .types import Tags, UsageEvent
@@ -30,6 +31,7 @@ __all__ = [
     "configure",
     "track",
     "atrack",
+    "tracked",
     "record",
     "flush",
     "Sink",

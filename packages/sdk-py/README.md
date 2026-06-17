@@ -59,6 +59,22 @@ res = await tl.atrack(
 )
 ```
 
+## Decorator
+
+Liever per-functie taggen dan elke call wrappen? Gebruik `@tracked` (werkt op sync
+én async functies):
+
+```python
+@tl.tracked({"feature": "summarizer"})
+def summarize(text):
+    return client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": text}],
+    )
+
+summarize("...")  # automatisch gelogd
+```
+
 ## Manueel loggen
 
 Heb je de tokens al, of gebruik je een provider die `track()` niet kent? Log direct:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import functools
+import inspect
 import json
 import threading
 import time
@@ -264,6 +266,42 @@ async def atrack(
             latency_ms=latency_ms,
         )
     return response
+
+
+def tracked(
+    tags: Tags,
+    *,
+    provider: Optional[str] = None,
+    model: Optional[str] = None,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """Decorator-variant: tag elke aanroep van een functie die een LLM-response
+    teruggeeft. Werkt op sync én async functies.
+
+        @tl.tracked({"feature": "summarizer"})
+        def summarize(text):
+            return client.chat.completions.create(model="gpt-4o-mini", messages=...)
+    """
+
+    def deco(fn: Callable[..., Any]) -> Callable[..., Any]:
+        if inspect.iscoroutinefunction(fn):
+
+            @functools.wraps(fn)
+            async def awrapper(*args: Any, **kwargs: Any) -> Any:
+                return await atrack(
+                    tags, lambda: fn(*args, **kwargs), provider=provider, model=model
+                )
+
+            return awrapper
+
+        @functools.wraps(fn)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            return track(
+                tags, lambda: fn(*args, **kwargs), provider=provider, model=model
+            )
+
+        return wrapper
+
+    return deco
 
 
 def flush() -> None:

@@ -53,9 +53,26 @@ export async function GET(req: NextRequest) {
   if (!projectId) {
     return NextResponse.json({ error: "missing_project" }, { status: 400 });
   }
-  const days = Number(url.searchParams.get("range") ?? 30);
-  const range = ALLOWED_RANGES.has(days) ? days : 30;
-  const since = new Date(Date.now() - range * 24 * 3600 * 1000).toISOString();
+  // Custom range (from/to in YYYY-MM-DD) heeft voorrang op de presets.
+  const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+  const from = url.searchParams.get("from");
+  const to = url.searchParams.get("to");
+  const isCustom = !!(from && to && isoDate.test(from) && isoDate.test(to));
+
+  let since: string;
+  let until: string | null;
+  let rangeTag: string;
+  if (isCustom) {
+    since = new Date(`${from}T00:00:00Z`).toISOString();
+    until = new Date(`${to}T23:59:59.999Z`).toISOString();
+    rangeTag = `${from}_${to}`;
+  } else {
+    const days = Number(url.searchParams.get("range") ?? 30);
+    const range = ALLOWED_RANGES.has(days) ? days : 30;
+    since = new Date(Date.now() - range * 24 * 3600 * 1000).toISOString();
+    until = null;
+    rangeTag = `${range}d`;
+  }
 
   const sb = await createServerSupabase();
 
@@ -69,13 +86,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "project_not_found" }, { status: 404 });
   }
 
-  const { data, error } = await sb
+  let query = sb
     .from("usage_events")
     .select(
       "ts,provider,model,input_tokens,output_tokens,cost_usd,latency_ms,customer,feature,team"
     )
     .eq("project_id", projectId)
-    .gte("ts", since)
+    .gte("ts", since);
+  if (until) query = query.lt("ts", until);
+  const { data, error } = await query
     .order("ts", { ascending: true })
     .limit(ROW_CAP)
     .returns<EventRow[]>();
@@ -92,7 +111,7 @@ export async function GET(req: NextRequest) {
   const csv = lines.join("\r\n") + "\r\n";
 
   const safeName = project.name.replace(/[^a-z0-9._-]+/gi, "_").slice(0, 40);
-  const filename = `tokenlens_${safeName}_${range}d.csv`;
+  const filename = `tokenlens_${safeName}_${rangeTag}.csv`;
 
   return new NextResponse(csv, {
     status: 200,

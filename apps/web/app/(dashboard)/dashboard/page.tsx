@@ -62,9 +62,19 @@ const RANGES: { days: number; label: string; short: string }[] = [
 export default async function Overview({
   searchParams,
 }: {
-  searchParams: Promise<{ project?: string; range?: string }>;
+  searchParams: Promise<{
+    project?: string;
+    range?: string;
+    from?: string;
+    to?: string;
+  }>;
 }) {
-  const { project: projectParam, range: rangeParam } = await searchParams;
+  const {
+    project: projectParam,
+    range: rangeParam,
+    from: fromParam,
+    to: toParam,
+  } = await searchParams;
   const projects = await getProjects();
 
   if (projects.length === 0) {
@@ -86,20 +96,52 @@ export default async function Overview({
 
   const project =
     projects.find((p) => p.id === projectParam) ?? projects[0];
+
+  // Custom range (from/to in YYYY-MM-DD) heeft voorrang op de presets.
+  const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+  const customFrom = fromParam && isoDate.test(fromParam) ? fromParam : null;
+  const customTo = toParam && isoDate.test(toParam) ? toParam : null;
+  const isCustom = Boolean(customFrom && customTo);
+
   const activeRange =
     RANGES.find((r) => String(r.days) === rangeParam) ?? RANGES[1];
-  // eslint-disable-next-line react-hooks/purity -- server component: huidige tijd is bedoeld
-  const since = new Date(
-    Date.now() - activeRange.days * 24 * 3600 * 1000
-  ).toISOString();
+
+  let since: string;
+  let until: string | null;
+  let rangeLabel: string;
+  let rangeShort: string;
+  if (isCustom) {
+    since = new Date(`${customFrom}T00:00:00Z`).toISOString();
+    until = new Date(`${customTo}T23:59:59.999Z`).toISOString();
+    rangeLabel = `${customFrom} – ${customTo}`;
+    rangeShort = "custom";
+  } else {
+    // eslint-disable-next-line react-hooks/purity -- server component: huidige tijd is bedoeld
+    since = new Date(
+      Date.now() - activeRange.days * 24 * 3600 * 1000
+    ).toISOString();
+    until = null; // RPC's gebruiken now() als bovengrens
+    rangeLabel = activeRange.label;
+    rangeShort = activeRange.short;
+  }
+
+  // Querystring die de huidige tijdsweergave bewaart (preset of custom).
+  const viewQs = isCustom
+    ? `from=${customFrom}&to=${customTo}`
+    : `range=${activeRange.days}`;
+
   const sb = await createServerSupabase();
   const plan = await getPlan();
   const isPro = plan === "pro";
 
   // KPI's + grafiek zijn gratis (de teaser). De breakdown is Pro-only.
   const [summary, ts] = await Promise.all([
-    sb.rpc("cost_summary", { p_project: project.id, p_since: since }),
-    sb.rpc("cost_timeseries", { p_project: project.id, p_since: since }),
+    sb.rpc("cost_summary", { p_project: project.id, p_since: since, p_until: until }),
+    sb.rpc("cost_timeseries", {
+      p_project: project.id,
+      p_since: since,
+      p_until: until,
+    }),
   ]);
 
   const [byCustomer, byFeature, byModel] = isPro
@@ -107,16 +149,19 @@ export default async function Overview({
         sb.rpc("cost_by_dimension", {
           p_project: project.id,
           p_since: since,
+          p_until: until,
           p_dim: "customer",
         }),
         sb.rpc("cost_by_dimension", {
           p_project: project.id,
           p_since: since,
+          p_until: until,
           p_dim: "feature",
         }),
         sb.rpc("cost_by_dimension", {
           p_project: project.id,
           p_since: since,
+          p_until: until,
           p_dim: "model",
         }),
       ])
@@ -133,14 +178,14 @@ export default async function Overview({
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-semibold">{project.name}</h1>
-          <p className="text-sm text-neutral-500">{activeRange.label}</p>
+          <p className="text-sm text-neutral-500">{rangeLabel}</p>
         </div>
         {projects.length > 1 && (
           <nav className="flex gap-2 flex-wrap">
             {projects.map((p) => (
               <Link
                 key={p.id}
-                href={`/dashboard?project=${p.id}&range=${activeRange.days}`}
+                href={`/dashboard?project=${p.id}&${viewQs}`}
                 className={`text-xs rounded-full px-3 py-1 border ${
                   p.id === project.id
                     ? "bg-neutral-100 text-neutral-900 border-neutral-100"
@@ -155,13 +200,13 @@ export default async function Overview({
       </div>
 
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <nav className="flex gap-1.5 flex-wrap">
+        <nav className="flex gap-1.5 flex-wrap items-center">
           {RANGES.map((r) => (
             <Link
               key={r.days}
               href={`/dashboard?project=${project.id}&range=${r.days}`}
               className={`text-xs rounded-md px-2.5 py-1 border ${
-                r.days === activeRange.days
+                !isCustom && r.days === activeRange.days
                   ? "bg-neutral-100 text-neutral-900 border-neutral-100"
                   : "border-neutral-700 text-neutral-400 hover:text-neutral-100"
               }`}
@@ -169,10 +214,36 @@ export default async function Overview({
               {r.short}
             </Link>
           ))}
+          <form method="get" action="/dashboard" className="flex items-center gap-1.5 ml-1">
+            <input type="hidden" name="project" value={project.id} />
+            <input
+              type="date"
+              name="from"
+              defaultValue={customFrom ?? ""}
+              className="text-xs rounded-md bg-neutral-900 border border-neutral-700 px-2 py-1 text-neutral-300"
+            />
+            <span className="text-neutral-600 text-xs">–</span>
+            <input
+              type="date"
+              name="to"
+              defaultValue={customTo ?? ""}
+              className="text-xs rounded-md bg-neutral-900 border border-neutral-700 px-2 py-1 text-neutral-300"
+            />
+            <button
+              type="submit"
+              className={`text-xs rounded-md px-2.5 py-1 border ${
+                isCustom
+                  ? "bg-neutral-100 text-neutral-900 border-neutral-100"
+                  : "border-neutral-700 text-neutral-400 hover:text-neutral-100"
+              }`}
+            >
+              Pas toe
+            </button>
+          </form>
         </nav>
         {isPro && (
           <a
-            href={`/api/export?project=${project.id}&range=${activeRange.days}`}
+            href={`/api/export?project=${project.id}&${viewQs}`}
             className="text-xs rounded-md px-3 py-1 border border-neutral-700 text-neutral-300 hover:text-white hover:border-neutral-500"
           >
             ↓ Export CSV
@@ -181,7 +252,7 @@ export default async function Overview({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Kpi label={`Kosten (${activeRange.short})`} value={usd(s.total_cost)} />
+        <Kpi label={`Kosten (${rangeShort})`} value={usd(s.total_cost)} />
         <Kpi label="Calls" value={num(s.total_events)} />
         <Kpi label="Tokens" value={num(s.total_tokens)} />
       </div>

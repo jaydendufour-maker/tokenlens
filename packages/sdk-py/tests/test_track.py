@@ -85,6 +85,32 @@ def test_flush_roept_sink_flush():
     assert sink.flushed == 1
 
 
+def test_tracked_decorator_sync():
+    sink = CaptureSink()
+    tl.configure(sink=sink)
+
+    @tl.tracked({"feature": "deco"})
+    def call(x):
+        return _Resp("gpt-4o-mini", _Usage(prompt_tokens=x, completion_tokens=1))
+
+    out = call(42)
+    assert out.model == "gpt-4o-mini"
+    assert sink.events[0].input_tokens == 42
+    assert sink.events[0].tags["feature"] == "deco"
+
+
+def test_tracked_decorator_async():
+    sink = CaptureSink()
+    tl.configure(sink=sink)
+
+    @tl.tracked({"feature": "deco-async"})
+    async def call():
+        return _Resp("gpt-4o", _Usage(input_tokens=5, output_tokens=5))
+
+    asyncio.run(call())
+    assert sink.events[0].tags["feature"] == "deco-async"
+
+
 def test_atrack_async():
     sink = CaptureSink()
     tl.configure(sink=sink)
