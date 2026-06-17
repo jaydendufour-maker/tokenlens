@@ -52,12 +52,19 @@ function Kpi({ label, value }: { label: string; value: string }) {
   );
 }
 
+const RANGES: { days: number; label: string; short: string }[] = [
+  { days: 7, label: "Laatste 7 dagen", short: "7d" },
+  { days: 30, label: "Laatste 30 dagen", short: "30d" },
+  { days: 90, label: "Laatste 90 dagen", short: "90d" },
+  { days: 365, label: "Laatste 12 maanden", short: "1j" },
+];
+
 export default async function Overview({
   searchParams,
 }: {
-  searchParams: Promise<{ project?: string }>;
+  searchParams: Promise<{ project?: string; range?: string }>;
 }) {
-  const { project: projectParam } = await searchParams;
+  const { project: projectParam, range: rangeParam } = await searchParams;
   const projects = await getProjects();
 
   if (projects.length === 0) {
@@ -79,8 +86,12 @@ export default async function Overview({
 
   const project =
     projects.find((p) => p.id === projectParam) ?? projects[0];
+  const activeRange =
+    RANGES.find((r) => String(r.days) === rangeParam) ?? RANGES[1];
   // eslint-disable-next-line react-hooks/purity -- server component: huidige tijd is bedoeld
-  const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+  const since = new Date(
+    Date.now() - activeRange.days * 24 * 3600 * 1000
+  ).toISOString();
   const sb = await createServerSupabase();
   const plan = await getPlan();
   const isPro = plan === "pro";
@@ -122,14 +133,14 @@ export default async function Overview({
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-semibold">{project.name}</h1>
-          <p className="text-sm text-neutral-500">Laatste 30 dagen</p>
+          <p className="text-sm text-neutral-500">{activeRange.label}</p>
         </div>
         {projects.length > 1 && (
           <nav className="flex gap-2 flex-wrap">
             {projects.map((p) => (
               <Link
                 key={p.id}
-                href={`/dashboard?project=${p.id}`}
+                href={`/dashboard?project=${p.id}&range=${activeRange.days}`}
                 className={`text-xs rounded-full px-3 py-1 border ${
                   p.id === project.id
                     ? "bg-neutral-100 text-neutral-900 border-neutral-100"
@@ -143,8 +154,34 @@ export default async function Overview({
         )}
       </div>
 
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <nav className="flex gap-1.5 flex-wrap">
+          {RANGES.map((r) => (
+            <Link
+              key={r.days}
+              href={`/dashboard?project=${project.id}&range=${r.days}`}
+              className={`text-xs rounded-md px-2.5 py-1 border ${
+                r.days === activeRange.days
+                  ? "bg-neutral-100 text-neutral-900 border-neutral-100"
+                  : "border-neutral-700 text-neutral-400 hover:text-neutral-100"
+              }`}
+            >
+              {r.short}
+            </Link>
+          ))}
+        </nav>
+        {isPro && (
+          <a
+            href={`/api/export?project=${project.id}&range=${activeRange.days}`}
+            className="text-xs rounded-md px-3 py-1 border border-neutral-700 text-neutral-300 hover:text-white hover:border-neutral-500"
+          >
+            ↓ Export CSV
+          </a>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Kpi label="Kosten (30d)" value={usd(s.total_cost)} />
+        <Kpi label={`Kosten (${activeRange.short})`} value={usd(s.total_cost)} />
         <Kpi label="Calls" value={num(s.total_events)} />
         <Kpi label="Tokens" value={num(s.total_tokens)} />
       </div>
