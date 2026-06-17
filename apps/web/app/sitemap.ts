@@ -1,13 +1,22 @@
 import type { MetadataRoute } from "next";
 import { MODELS, COMPARISONS } from "@/lib/models";
+import { COMPETITORS } from "@/lib/competitors";
 import { getAllPosts } from "@/lib/content";
 import { SITE_URL as BASE } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPages = ["", "/pricing", "/blog", "/login"].map((p) => ({
-    url: `${BASE}${p}`,
-    changeFrequency: "weekly" as const,
-    priority: p === "" ? 1 : 0.7,
+  const staticPages = ["", "/pricing", "/alternatives", "/blog", "/login"].map(
+    (p) => ({
+      url: `${BASE}${p}`,
+      changeFrequency: "weekly" as const,
+      priority: p === "" ? 1 : 0.7,
+    })
+  );
+
+  const altPages = COMPETITORS.map((c) => ({
+    url: `${BASE}/alternatives/${c.slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
   }));
 
   const modelPages = MODELS.map((m) => ({
@@ -29,5 +38,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...modelPages, ...comparePages, ...blogPages];
+  return [
+    ...staticPages,
+    ...modelPages,
+    ...comparePages,
+    ...altPages,
+    ...blogPages,
+  ];
 }

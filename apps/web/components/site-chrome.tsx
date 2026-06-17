@@ -12,6 +12,9 @@ export function SiteHeader() {
           <Link href="/pricing" className="hover:text-neutral-100">
             Pricing
           </Link>
+          <Link href="/alternatives" className="hover:text-neutral-100">
+            Alternatives
+          </Link>
           <Link href="/blog" className="hover:text-neutral-100">
             Blog
           </Link>
@@ -38,6 +41,9 @@ export function SiteFooter() {
         <div className="flex gap-5">
           <Link href="/pricing" className="hover:text-neutral-300">
             Pricing
+          </Link>
+          <Link href="/alternatives" className="hover:text-neutral-300">
+            Alternatives
           </Link>
           <Link href="/blog" className="hover:text-neutral-300">
             Blog
