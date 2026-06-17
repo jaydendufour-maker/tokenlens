@@ -134,36 +134,25 @@ export default async function Overview({
   const plan = await getPlan();
   const isPro = plan === "pro";
 
+  // p_until alleen meesturen bij een custom-range → presets blijven werken op
+  // het oude 2-arg-schema (migratie 0006 nog niet gedraaid = geen breuk).
+  const base = {
+    p_project: project.id,
+    p_since: since,
+    ...(until ? { p_until: until } : {}),
+  };
+
   // KPI's + grafiek zijn gratis (de teaser). De breakdown is Pro-only.
   const [summary, ts] = await Promise.all([
-    sb.rpc("cost_summary", { p_project: project.id, p_since: since, p_until: until }),
-    sb.rpc("cost_timeseries", {
-      p_project: project.id,
-      p_since: since,
-      p_until: until,
-    }),
+    sb.rpc("cost_summary", base),
+    sb.rpc("cost_timeseries", base),
   ]);
 
   const [byCustomer, byFeature, byModel] = isPro
     ? await Promise.all([
-        sb.rpc("cost_by_dimension", {
-          p_project: project.id,
-          p_since: since,
-          p_until: until,
-          p_dim: "customer",
-        }),
-        sb.rpc("cost_by_dimension", {
-          p_project: project.id,
-          p_since: since,
-          p_until: until,
-          p_dim: "feature",
-        }),
-        sb.rpc("cost_by_dimension", {
-          p_project: project.id,
-          p_since: since,
-          p_until: until,
-          p_dim: "model",
-        }),
+        sb.rpc("cost_by_dimension", { ...base, p_dim: "customer" }),
+        sb.rpc("cost_by_dimension", { ...base, p_dim: "feature" }),
+        sb.rpc("cost_by_dimension", { ...base, p_dim: "model" }),
       ])
     : [null, null, null];
 
