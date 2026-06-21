@@ -6,9 +6,9 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
   "https://tokenlens.dev";
 
-// Zet NEXT_PUBLIC_GITHUB_URL bij launch (of vervang USER hieronder door je handle).
 export const GITHUB_URL =
-  process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/USER/tokenlens";
+  process.env.NEXT_PUBLIC_GITHUB_URL ??
+  "https://github.com/jaydendufour-maker/tokenlens";
 
 // LemonSqueezy hosted-checkout-link voor Pro (kaart). Leeg = kaart-rail nog uit.
 export const LS_CHECKOUT_URL =

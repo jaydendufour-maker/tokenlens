@@ -15,6 +15,7 @@ export async function createProjectAction(
   formData: FormData
 ): Promise<CreateState> {
   const name = String(formData.get("name") ?? "").trim() || "Mijn project";
+  if (name.length > 100) return { error: "Projectnaam is te lang" };
   const sb = await createServerSupabase();
   const {
     data: { user },

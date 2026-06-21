@@ -5,6 +5,10 @@ def test_price_for_matcht_langste_prefix():
     assert price_for("gpt-4o-mini-2024-07-18") == (0.15, 0.6)
     assert price_for("gpt-4o-2024-08-06") == (2.5, 10)
     assert price_for("claude-3-5-sonnet-20241022") == (3, 15)
+    assert price_for("gpt-5.5-pro-2026-06-01") == (30, 180)
+    assert price_for("gpt-5.4-mini-2026-03-05") == (0.75, 4.5)
+    assert price_for("claude-opus-4-8-20260601") == (5, 25)
+    assert price_for("claude-haiku-4-5-20251001") == (1, 5)
 
 
 def test_onbekend_model_geeft_none_en_kosten_nul():

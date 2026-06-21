@@ -68,10 +68,11 @@ Ververs het dashboard → je ziet kosten per klant/feature/model + per dag.
    drempel in USD, per dag of maand, e-mail en/of webhook).
 2. De alerts worden gecheckt door een cron die dit endpoint aanroept:
    ```
-   GET http://localhost:3000/api/cron/check-alerts?token=<CRON_SECRET>
+   curl -H "Authorization: Bearer <CRON_SECRET>" \
+     http://localhost:3000/api/cron/check-alerts
    ```
-   - Lokaal testen: open die URL in je browser → je krijgt `{ok, checked, triggered}`.
-   - In productie: zet een gratis cron (cron-job.org) die elk uur die URL aanroept.
+   - Lokaal testen: voer het curl-commando uit → `{ok, checked, triggered}`.
+   - In productie: laat de cron elk uur dezelfde Bearer-header meesturen.
 3. E-mail werkt zodra `RESEND_API_KEY` gezet is; webhooks werken altijd.
    Een alert vuurt **max één keer per periode** (geen spam).
 

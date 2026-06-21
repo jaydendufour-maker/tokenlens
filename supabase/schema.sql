@@ -317,3 +317,67 @@ $$;
 grant execute on function public.cost_summary(uuid, timestamptz, timestamptz)            to authenticated;
 grant execute on function public.cost_timeseries(uuid, timestamptz, timestamptz)         to authenticated;
 grant execute on function public.cost_by_dimension(uuid, timestamptz, text, timestamptz) to authenticated;
+
+-- ===== 0007_security_hardening.sql =====
+-- Zie losse migratie voor bestaande databases. Nieuwe installaties krijgen
+-- dezelfde defense-in-depth constraints via deze geconsolideerde schemafile.
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'projects_name_length') then
+    alter table public.projects add constraint projects_name_length check (char_length(name) between 1 and 100);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'alerts_name_length') then
+    alter table public.budget_alerts add constraint alerts_name_length check (char_length(name) between 1 and 100);
+    alter table public.budget_alerts add constraint alerts_tag_key check (tag_key in ('project','customer','feature','team'));
+    alter table public.budget_alerts add constraint alerts_tag_value_length check (tag_value is null or char_length(tag_value) <= 256);
+    alter table public.budget_alerts add constraint alerts_period check (period in ('day','month'));
+    alter table public.budget_alerts add constraint alerts_threshold check (threshold_usd > 0 and threshold_usd <= 1000000000);
+    alter table public.budget_alerts add constraint alerts_webhook_https check (webhook_url is null or webhook_url ~ '^https://');
+    alter table public.budget_alerts add constraint alerts_email_length check (notify_email is null or char_length(notify_email) <= 320);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'usage_provider_length') then
+    alter table public.usage_events add constraint usage_provider_length check (char_length(provider) between 1 and 64);
+    alter table public.usage_events add constraint usage_model_length check (char_length(model) between 1 and 160);
+    alter table public.usage_events add constraint usage_tokens_range check (input_tokens between 0 and 2147483647 and output_tokens between 0 and 2147483647);
+    alter table public.usage_events add constraint usage_cost_range check (cost_usd between 0 and 1000000);
+    alter table public.usage_events add constraint usage_latency_range check (latency_ms is null or latency_ms between 0 and 86400000);
+    alter table public.usage_events add constraint usage_tags_object check (jsonb_typeof(tags) = 'object' and pg_column_size(tags) <= 16384);
+  end if;
+end $$;
+
+-- ===== 0008_delivery_and_billing_atomicity.sql =====
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'alerts_delivery_channel') then
+    alter table public.budget_alerts add constraint alerts_delivery_channel
+      check (webhook_url is not null or notify_email is not null) not valid;
+  end if;
+end $$;
+
+create or replace function public.grant_pro_from_payment(
+  p_user_id uuid, p_provider text, p_external_id text, p_status text,
+  p_amount_usd numeric default null, p_until timestamptz default null,
+  p_add_months integer default 0
+) returns text language plpgsql security definer set search_path = public as $$
+declare
+  inserted_id uuid;
+  current_until timestamptz;
+  target_until timestamptz := p_until;
+begin
+  if p_provider not in ('nowpayments', 'lemonsqueezy', 'paddle') then raise exception 'invalid payment provider'; end if;
+  if p_add_months < 0 or p_add_months > 24 then raise exception 'invalid extension'; end if;
+  insert into public.payments(user_id, provider, external_id, status, amount_usd)
+    values (p_user_id, p_provider, p_external_id, p_status, p_amount_usd)
+    on conflict (provider, external_id) do nothing returning id into inserted_id;
+  if inserted_id is null then return 'duplicate'; end if;
+  if p_add_months > 0 then
+    select plan_expires_at into current_until from public.profiles where id = p_user_id for update;
+    target_until := greatest(coalesce(current_until, now()), now()) + make_interval(months => p_add_months);
+  end if;
+  update public.profiles set plan = 'pro', plan_expires_at = target_until where id = p_user_id;
+  if not found then raise exception 'profile not found'; end if;
+  return 'ok';
+end;
+$$;
+revoke all on function public.grant_pro_from_payment(uuid,text,text,text,numeric,timestamptz,integer) from public, anon, authenticated;
+grant execute on function public.grant_pro_from_payment(uuid,text,text,text,numeric,timestamptz,integer) to service_role;

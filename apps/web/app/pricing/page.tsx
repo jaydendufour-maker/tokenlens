@@ -6,7 +6,7 @@ import { SiteHeader, SiteFooter, CtaBanner } from "@/components/site-chrome";
 export const metadata: Metadata = {
   title: "LLM pricing — OpenAI & Anthropic cost per 1M tokens (2026)",
   description:
-    "Up-to-date pricing for GPT-4o, GPT-4.1, o3, Claude Sonnet, Haiku and Opus. Input and output cost per 1M tokens, with a free cost calculator.",
+    "Pricing for GPT-5.5, GPT-5.4, Claude Opus 4.8, Sonnet 4.6 and legacy models. Input/output cost per 1M tokens with a free calculator.",
 };
 
 export default function PricingIndex() {
@@ -18,6 +18,10 @@ export default function PricingIndex() {
         <p className="mt-3 text-neutral-400">
           Input / output cost per 1M tokens for the most-used models. Click a
           model for a calculator. Prices change — verify with the provider.
+        </p>
+        <p className="mt-2 text-xs text-neutral-600">
+          Standard API rates verified 21 June 2026. Cached, batch, priority and
+          regional pricing can differ.
         </p>
 
         <div className="mt-8 overflow-hidden rounded-xl border border-neutral-800">

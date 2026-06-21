@@ -12,6 +12,13 @@ export interface ModelPrice {
 
 export const DEFAULT_PRICING: Record<string, ModelPrice> = {
   // OpenAI
+  // Standard short-context rates, verified against official pricing 2026-06-21.
+  "gpt-5.5-pro": { in: 30, out: 180 },
+  "gpt-5.5": { in: 5, out: 30 },
+  "gpt-5.4-mini": { in: 0.75, out: 4.5 },
+  "gpt-5.4-nano": { in: 0.2, out: 1.25 },
+  "gpt-5.4-pro": { in: 30, out: 180 },
+  "gpt-5.4": { in: 2.5, out: 15 },
   "gpt-4o-mini": { in: 0.15, out: 0.6 },
   "gpt-4o": { in: 2.5, out: 10 },
   "gpt-4.1-mini": { in: 0.4, out: 1.6 },
@@ -19,6 +26,16 @@ export const DEFAULT_PRICING: Record<string, ModelPrice> = {
   "o3-mini": { in: 1.1, out: 4.4 },
   "o3": { in: 2, out: 8 },
   // Anthropic
+  // Base input/output rates, verified against official pricing 2026-06-21.
+  "claude-fable-5": { in: 10, out: 50 },
+  "claude-mythos-5": { in: 10, out: 50 },
+  "claude-opus-4-8": { in: 5, out: 25 },
+  "claude-opus-4-7": { in: 5, out: 25 },
+  "claude-opus-4-6": { in: 5, out: 25 },
+  "claude-opus-4-5": { in: 5, out: 25 },
+  "claude-sonnet-4-6": { in: 3, out: 15 },
+  "claude-sonnet-4-5": { in: 3, out: 15 },
+  "claude-haiku-4-5": { in: 1, out: 5 },
   "claude-haiku": { in: 0.8, out: 4 },
   "claude-3-5-haiku": { in: 0.8, out: 4 },
   "claude-sonnet": { in: 3, out: 15 },

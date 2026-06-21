@@ -116,9 +116,10 @@ export default async function Overview({
     rangeLabel = `${customFrom} – ${customTo}`;
     rangeShort = "custom";
   } else {
-    // eslint-disable-next-line react-hooks/purity -- server component: huidige tijd is bedoeld
+    // eslint-disable-next-line react-hooks/purity -- dynamische serverweergave gebruikt huidige tijd
+    const nowMs = Date.now();
     since = new Date(
-      Date.now() - activeRange.days * 24 * 3600 * 1000
+      nowMs - activeRange.days * 24 * 3600 * 1000
     ).toISOString();
     until = null; // RPC's gebruiken now() als bovengrens
     rangeLabel = activeRange.label;

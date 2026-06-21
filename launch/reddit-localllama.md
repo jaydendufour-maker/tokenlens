@@ -33,7 +33,7 @@ tl.track({"customer": "acme", "feature": "rag"},
 Not trying to be Langfuse/Helicone — no tracing/prompt-logging. Just the cost
 attribution piece, because that's the part I kept needing.
 
-Repo + SDK: <GITHUB_URL>
+Repo + SDK: https://github.com/jaydendufour-maker/tokenlens
 
 Would love feedback on the API. Specifically: do you prefer explicit
 `track(tags, fn)` or auto-patching the client so you don't touch call sites?

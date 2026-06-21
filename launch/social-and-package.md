@@ -26,8 +26,8 @@ Not an observability tool — just the cost-attribution piece nobody does cleanl
 SDKs are MIT, zero deps. Bring your own sink if you don't want the backend.
 Free tier shows totals; breakdown + alerts are paid.
 
-Try it: <SITE_URL>
-Repo: <GITHUB_URL>
+Try it: https://agentauditor-jd.duckdns.org
+Repo: https://github.com/jaydendufour-maker/tokenlens
 Feedback very welcome 🙏
 
 ---

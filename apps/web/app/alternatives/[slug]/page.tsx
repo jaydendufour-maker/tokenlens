@@ -4,6 +4,19 @@ import { notFound } from "next/navigation";
 import { COMPETITORS, competitorBySlug } from "@/lib/competitors";
 import { SiteHeader, SiteFooter, CtaBanner } from "@/components/site-chrome";
 
+const Check = () => <span className="text-emerald-400">●</span>;
+const Dash = () => <span className="text-neutral-600">—</span>;
+
+function comparisonRow(label: string, tokenlens: React.ReactNode, them: React.ReactNode) {
+  return (
+    <tr className="divide-x divide-neutral-800">
+      <td className="px-4 py-3 text-neutral-400">{label}</td>
+      <td className="px-4 py-3 text-center">{tokenlens}</td>
+      <td className="px-4 py-3 text-center">{them}</td>
+    </tr>
+  );
+}
+
 export function generateStaticParams() {
   return COMPETITORS.map((c) => ({ slug: c.slug }));
 }
@@ -30,21 +43,6 @@ export default async function Alternative({
   const { slug } = await params;
   const c = competitorBySlug(slug);
   if (!c) notFound();
-
-  const Check = () => <span className="text-emerald-400">●</span>;
-  const Dash = () => <span className="text-neutral-600">—</span>;
-
-  const row = (
-    label: string,
-    tokenlens: React.ReactNode,
-    them: React.ReactNode
-  ) => (
-    <tr className="divide-x divide-neutral-800">
-      <td className="px-4 py-3 text-neutral-400">{label}</td>
-      <td className="px-4 py-3 text-center">{tokenlens}</td>
-      <td className="px-4 py-3 text-center">{them}</td>
-    </tr>
-  );
 
   return (
     <div className="flex-1 bg-neutral-950 text-neutral-100">
@@ -89,10 +87,10 @@ export default async function Alternative({
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-800">
-              {row("Cost per customer / feature / team", <Check />, <Dash />)}
-              {row("Budget alerts (email + webhook)", <Check />, <Dash />)}
-              {row("Zero-dependency SDK (TS + Python)", <Check />, <Dash />)}
-              {row(
+              {comparisonRow("Cost per customer / feature / team", <Check />, <Dash />)}
+              {comparisonRow("Budget alerts (email + webhook)", <Check />, <Dash />)}
+              {comparisonRow("Zero-dependency SDK (TS + Python)", <Check />, <Dash />)}
+              {comparisonRow(
                 "Full request tracing / evals",
                 <Dash />,
                 <Check />

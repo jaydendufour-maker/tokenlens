@@ -26,4 +26,4 @@ It's early and solo-built. If you run an AI feature: what would you want to *do*
 with the attribution once you have it — alert, rate-limit per customer, bill it
 back? That's what I'm trying to figure out next.
 
-Link: <SITE_URL>  ·  Repo: <GITHUB_URL>
+Link: https://agentauditor-jd.duckdns.org  ·  Repo: https://github.com/jaydendufour-maker/tokenlens

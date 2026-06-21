@@ -21,7 +21,7 @@ Tag elke LLM-call met `customer`, `feature`, `team` → zie precies waar je spen
 ```
 packages/sdk      → de open-source SDK (tokenlens-sdk op npm)
 apps/web          → Next.js 16: publieke landing + SEO-pagina's + dashboard + ingest + cron
-supabase          → schema.sql (alles) + migrations/ (0001-0004)
+supabase          → schema.sql (alles) + migrations/ (0001-0008)
 deploy-vm.sh      → one-command deploy naar de GCP-VM
 SETUP-JAYDEN.md   → Supabase opzetten + lokaal draaien
 LAUNCH.md         → resterende launch-kliks (Supabase/npm/GitHub/payments)
@@ -42,5 +42,7 @@ De publieke + SEO-pagina's werken óók zonder Supabase; alleen dashboard/login 
 ```
 
 ## Status
-**Live** op de GCP-VM (publieke site + SEO-motor). Dashboard activeert zodra Supabase
-gekoppeld is — zie **LAUNCH.md** voor de resterende kliks.
+**Live** op de GCP-VM (publieke site + SEO-motor). Supabase is gekoppeld; vóór
+publieke launch worden de service-role key en migraties 0006-0007 nog geverifieerd.
+
+GitHub: https://github.com/jaydendufour-maker/tokenlens

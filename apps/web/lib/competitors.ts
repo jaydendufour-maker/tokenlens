@@ -36,7 +36,7 @@ export const COMPETITORS: Competitor[] = [
       "Proxy-based setup means little code change",
       "Caching and rate-limit features beyond pure analytics",
     ],
-    gap: "Helicone is built around requests and traces. Cost attribution to a business dimension — which customer, which feature, which team — is not the core object. TokenLens makes that the whole product: you tag the call, and the dashboard is organized around cost per dimension plus budget alerts.",
+    gap: "Helicone supports user analytics, custom properties and alerts inside a broad request-observability platform. TokenLens is narrower: metadata-only cost attribution without a proxy or prompt/response logging, organized directly around spend per business dimension.",
     switchIf: [
       "Your main question is \"which customer/feature is this spend?\", not \"what did this request do?\"",
       "You want budget alerts per customer/feature/team, not just dashboards",
@@ -58,7 +58,7 @@ export const COMPETITORS: Competitor[] = [
       "Prompt management and evaluation tooling",
       "Strong open-source community and integrations",
     ],
-    gap: "Langfuse is a tracing-and-eval platform; cost is one metric among many on a trace. TokenLens does the opposite — cost attribution per customer/feature/team is the entire surface, with alerts that fire before the bill does. It's narrower on purpose, and far simpler to stand up if cost is the only thing you need.",
+    gap: "Langfuse combines tracing, evals, prompt management, cost metrics and monitors. TokenLens deliberately avoids that platform surface: metadata-only cost attribution per customer/feature/team, without storing prompts or responses.",
     switchIf: [
       "You don't need full tracing/evals — you need to know who is spending",
       "You want a single small SDK + a cost dashboard, not a platform to learn",

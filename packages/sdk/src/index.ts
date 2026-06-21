@@ -38,30 +38,39 @@ export function httpSink(opts: {
   const batchSize = opts.batchSize ?? 20;
   const f = opts.fetchImpl ?? fetch;
   let buffer: UsageEvent[] = [];
+  let inFlight: Promise<void> = Promise.resolve();
   const send = async () => {
     if (buffer.length === 0) return;
     const batch = buffer;
     buffer = [];
-    try {
-      await f(opts.url, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${opts.apiKey}`,
-        },
-        body: JSON.stringify({ events: batch }),
-      });
-    } catch {
-      // Nooit de app laten crashen op een telemetrie-fout; her-buffer voor flush.
-      buffer = batch.concat(buffer);
-    }
+    const attempt = inFlight.then(async () => {
+      try {
+        const response = await f(opts.url, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${opts.apiKey}`,
+          },
+          body: JSON.stringify({ events: batch }),
+        });
+        if (!response.ok) throw new Error(`TokenLens ingest HTTP ${response.status}`);
+      } catch {
+        // Nooit de app laten crashen op een telemetrie-fout; her-buffer voor flush.
+        buffer = batch.concat(buffer);
+      }
+    });
+    inFlight = attempt.catch(() => undefined);
+    await attempt;
   };
   return {
     record(e) {
       buffer.push(e);
       if (buffer.length >= batchSize) void send();
     },
-    flush: send,
+    async flush() {
+      await inFlight;
+      await send();
+    },
   };
 }
 

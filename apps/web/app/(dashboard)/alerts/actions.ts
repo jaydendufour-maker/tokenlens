@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getPlan } from "@/lib/data";
+import { webhookUrlSyntaxError } from "@/lib/webhook-url";
 
 export interface AlertFormState {
   error?: string;
@@ -32,13 +33,23 @@ export async function createAlertAction(
   const webhook_url = String(formData.get("webhook_url") ?? "").trim() || null;
 
   if (!project_id) return { error: "Kies een project" };
-  if (!name) return { error: "Geef de alert een naam" };
-  if (!Number.isFinite(threshold_usd) || threshold_usd <= 0)
+  if (!name || name.length > 100) return { error: "Geef een korte alertnaam" };
+  if (!Number.isFinite(threshold_usd) || threshold_usd <= 0 || threshold_usd > 1_000_000_000)
     return { error: "Drempel moet groter dan 0 zijn" };
   if (!["project", "customer", "feature", "team"].includes(tag_key))
     return { error: "Ongeldige scope" };
   if (tag_key !== "project" && !tag_value)
     return { error: "Vul een waarde in voor de gekozen scope" };
+  if (tag_value && tag_value.length > 256) return { error: "Scopewaarde is te lang" };
+  if (!["day", "month"].includes(period)) return { error: "Ongeldige periode" };
+  if (notify_email && (notify_email.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notify_email)))
+    return { error: "Ongeldig e-mailadres" };
+  if (webhook_url) {
+    const webhookError = webhookUrlSyntaxError(webhook_url);
+    if (webhookError) return { error: webhookError };
+  }
+  if (!notify_email && !webhook_url)
+    return { error: "Kies minimaal e-mail of webhook" };
 
   const { error } = await sb.from("budget_alerts").insert({
     project_id,

@@ -19,6 +19,13 @@ class ModelPrice(NamedTuple):
 
 DEFAULT_PRICING: Dict[str, ModelPrice] = {
     # OpenAI
+    # Standard short-context rates, verified against official pricing 2026-06-21.
+    "gpt-5.5-pro": ModelPrice(30, 180),
+    "gpt-5.5": ModelPrice(5, 30),
+    "gpt-5.4-mini": ModelPrice(0.75, 4.5),
+    "gpt-5.4-nano": ModelPrice(0.2, 1.25),
+    "gpt-5.4-pro": ModelPrice(30, 180),
+    "gpt-5.4": ModelPrice(2.5, 15),
     "gpt-4o-mini": ModelPrice(0.15, 0.6),
     "gpt-4o": ModelPrice(2.5, 10),
     "gpt-4.1-mini": ModelPrice(0.4, 1.6),
@@ -26,6 +33,16 @@ DEFAULT_PRICING: Dict[str, ModelPrice] = {
     "o3-mini": ModelPrice(1.1, 4.4),
     "o3": ModelPrice(2, 8),
     # Anthropic
+    # Base input/output rates, verified against official pricing 2026-06-21.
+    "claude-fable-5": ModelPrice(10, 50),
+    "claude-mythos-5": ModelPrice(10, 50),
+    "claude-opus-4-8": ModelPrice(5, 25),
+    "claude-opus-4-7": ModelPrice(5, 25),
+    "claude-opus-4-6": ModelPrice(5, 25),
+    "claude-opus-4-5": ModelPrice(5, 25),
+    "claude-sonnet-4-6": ModelPrice(3, 15),
+    "claude-sonnet-4-5": ModelPrice(3, 15),
+    "claude-haiku-4-5": ModelPrice(1, 5),
     "claude-haiku": ModelPrice(0.8, 4),
     "claude-3-5-haiku": ModelPrice(0.8, 4),
     "claude-sonnet": ModelPrice(3, 15),

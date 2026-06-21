@@ -64,4 +64,4 @@ It's early and I'm solo on it, so I'd genuinely like feedback on:
    (monkeypatch the client) instead?
 2. What dimension am I missing besides customer/feature/team/model?
 
-Repo: <GITHUB_URL>  ·  Happy to answer anything.
+Repo: https://github.com/jaydendufour-maker/tokenlens  ·  Happy to answer anything.

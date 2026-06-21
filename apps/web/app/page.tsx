@@ -75,6 +75,9 @@ export default function Landing() {
           <span className="text-neutral-200">before</span> it blows up, not after
           the invoice lands.
         </p>
+        <p className="mt-3 text-sm text-neutral-500">
+          Metadata only: TokenLens never stores your prompts or responses.
+        </p>
         <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
           <Link
             href="/login"
@@ -116,8 +119,8 @@ export default function Landing() {
       <section className="max-w-5xl mx-auto px-6 pb-20 grid gap-6 md:grid-cols-3">
         {[
           {
-            t: "Cost attribution, not just logs",
-            d: "Helicone and Langfuse show you traces. TokenLens answers the question your CFO asks: who is paying for what?",
+            t: "Cost attribution without prompt logging",
+            d: "Send token counts, model, cost and your business tags. Prompts and responses stay inside your application.",
           },
           {
             t: "Budget alerts before the bill",
@@ -182,8 +185,7 @@ export default function Landing() {
               {[
                 "Cost breakdown by customer, feature & team",
                 "Budget alerts (email + webhook)",
-                "Unlimited events & projects",
-                "Longer data retention",
+                "CSV usage export",
               ].map((x) => (
                 <li key={x} className="flex gap-2">
                   <Check />
@@ -216,7 +218,7 @@ export default function Landing() {
               Blog
             </Link>
             <a
-              href="https://github.com/tokenlens/tokenlens"
+              href={GITHUB_URL}
               className="hover:text-neutral-300"
             >
               GitHub

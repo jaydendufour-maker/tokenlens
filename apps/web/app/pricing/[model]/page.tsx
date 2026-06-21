@@ -89,6 +89,14 @@ export default async function ModelPricing({
           {m.name} pricing
         </h1>
         <p className="mt-3 text-neutral-400">{m.blurb}</p>
+        <p className="mt-2 text-xs text-neutral-600">
+          Standard API rate verified 21 June 2026; caching, batch and regional
+          processing may use different rates. Verify on the {m.provider === "OpenAI" ? (
+            <a className="underline hover:text-neutral-400" href="https://platform.openai.com/docs/pricing">OpenAI pricing page</a>
+          ) : (
+            <a className="underline hover:text-neutral-400" href="https://platform.claude.com/docs/en/about-claude/pricing">Anthropic pricing page</a>
+          )}.
+        </p>
 
         <div className="mt-6 grid grid-cols-2 gap-4">
           <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
@@ -133,7 +141,7 @@ export default async function ModelPricing({
 
 await track(
   { customer: "acme", feature: "chat", team: "growth" },
-  () => openai.chat.completions.create({ model: "${m.slug}", ... })
+  () => openai.chat.completions.create({ model: "${m.apiId ?? m.slug}", ... })
 );`}</code>
         </pre>
 

@@ -29,4 +29,4 @@ tl.track({"team": "search", "feature": "reranker"},
 ```
 
 Curious how teams here handle this today — homegrown tagging in logs + a dbt
-model? Something off-the-shelf? Repo: <GITHUB_URL>
+model? Something off-the-shelf? Repo: https://github.com/jaydendufour-maker/tokenlens

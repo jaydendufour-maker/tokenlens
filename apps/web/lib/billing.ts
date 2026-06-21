@@ -72,41 +72,18 @@ export async function recordAndGrant(
   i: GrantInput
 ): Promise<"ok" | "duplicate" | "error"> {
   const admin = createAdminClient();
-
-  // idempotentie: dezelfde (provider, external_id) telt maar één keer
-  const { error } = await admin.from("payments").insert({
-    user_id: i.userId,
-    provider: i.provider,
-    external_id: i.externalId,
-    status: i.status,
-    amount_usd: i.amountUsd ?? null,
+  // Eén DB-transactie: payment-log en planupdate slagen samen of geen van beide.
+  const { data, error } = await admin.rpc("grant_pro_from_payment", {
+    p_user_id: i.userId,
+    p_provider: i.provider,
+    p_external_id: i.externalId,
+    p_status: i.status,
+    p_amount_usd: i.amountUsd ?? null,
+    p_until: i.until ?? null,
+    p_add_months: i.addMonths ?? 0,
   });
-  if (error) {
-    if ((error as { code?: string }).code === "23505") return "duplicate";
-    return "error";
-  }
-
-  let until = i.until ?? null;
-  if (i.addMonths) {
-    const { data } = await admin
-      .from("profiles")
-      .select("plan_expires_at")
-      .eq("id", i.userId)
-      .maybeSingle();
-    const now = new Date();
-    const base =
-      data?.plan_expires_at && new Date(data.plan_expires_at) > now
-        ? new Date(data.plan_expires_at)
-        : now;
-    base.setMonth(base.getMonth() + i.addMonths);
-    until = base.toISOString();
-  }
-
-  const { error: upErr } = await admin
-    .from("profiles")
-    .update({ plan: "pro", plan_expires_at: until })
-    .eq("id", i.userId);
-  return upErr ? "error" : "ok";
+  if (error) return "error";
+  return data === "duplicate" ? "duplicate" : data === "ok" ? "ok" : "error";
 }
 
 export async function revokePro(userId: string): Promise<void> {

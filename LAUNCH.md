@@ -10,7 +10,7 @@ Volgorde: 1 → 2 maakt het dashboard live. 3 → 4 maakt de SDK + repo publiek.
 ## 1. Supabase koppelen (dashboard live) — gratis
 1. https://supabase.com → **New project** (free tier).
 2. **SQL Editor → New query** → plak heel `supabase/schema.sql` → **Run**.
-   (Alle migraties 0001-0005 in één keer, incl. `profiles` + `payments`.)
+   (Alle migraties 0001-0008 in één keer, incl. profiles, payments en hardening.)
 3. **Settings → API** → kopieer: Project URL, `anon` key, `service_role` key.
 
 ### 1b. Auth correct zetten (signup + verificatiemail die werkt)
@@ -56,13 +56,11 @@ npm publish          # bouwt automatisch (prepublishOnly) en publiceert publiek
 → `npm i tokenlens-sdk` werkt wereldwijd.
 
 ## 4. GitHub publiek maken — gratis
-1. Maak een repo (bv. `github.com/<jouw-handle>/tokenlens`).
-2. Vervang overal de placeholder `USER` / repo-URL:
-   - `packages/sdk/package.json` (homepage/repository/bugs)
-   - zet `NEXT_PUBLIC_GITHUB_URL=https://github.com/<handle>/tokenlens` in de VM-`.env`
-     (de site leest 'm daar vandaan — code hoeft niet aangepast).
+1. Repo: `https://github.com/jaydendufour-maker/tokenlens`.
+2. Zet `NEXT_PUBLIC_GITHUB_URL=https://github.com/jaydendufour-maker/tokenlens`
+   in de VM-`.env` (de code heeft dezelfde veilige default).
 3. ```bash
-   git remote add origin https://github.com/<handle>/tokenlens.git
+   git remote add origin https://github.com/jaydendufour-maker/tokenlens.git
    git push -u origin main
    ```
 

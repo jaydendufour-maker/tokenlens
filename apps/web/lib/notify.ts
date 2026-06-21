@@ -22,16 +22,25 @@ export async function sendWebhook(
   url: string,
   payload: AlertPayload
 ): Promise<boolean> {
+  if (!(await isSafeWebhookUrl(url))) return false;
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ type: "tokenlens.budget_alert", ...payload }),
+      redirect: "manual",
+      signal: AbortSignal.timeout(5_000),
     });
     return res.ok;
   } catch {
     return false;
   }
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>'"]/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+  })[char] ?? char);
 }
 
 export async function sendAlertEmail(
@@ -49,12 +58,12 @@ export async function sendAlertEmail(
     <div style="font-family:system-ui,sans-serif;max-width:480px">
       <h2 style="margin:0 0 8px">⚠️ Budget alert triggered</h2>
       <p style="color:#444;margin:0 0 16px">
-        <strong>${payload.alert}</strong> on project
-        <strong>${payload.project}</strong> crossed its threshold.
+        <strong>${escapeHtml(payload.alert)}</strong> on project
+        <strong>${escapeHtml(payload.project)}</strong> crossed its threshold.
       </p>
       <table style="border-collapse:collapse;font-size:14px">
-        <tr><td style="padding:4px 12px 4px 0;color:#666">Scope</td><td>${payload.scope}</td></tr>
-        <tr><td style="padding:4px 12px 4px 0;color:#666">Period</td><td>${payload.period}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#666">Scope</td><td>${escapeHtml(payload.scope)}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#666">Period</td><td>${escapeHtml(payload.period)}</td></tr>
         <tr><td style="padding:4px 12px 4px 0;color:#666">Spend</td><td><strong>${fmtUsd(
           payload.spendUsd
         )}</strong></td></tr>
@@ -79,3 +88,4 @@ export async function sendAlertEmail(
     return false;
   }
 }
+import { isSafeWebhookUrl } from "@/lib/webhook-url";

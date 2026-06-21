@@ -11,23 +11,28 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist/index.js", "dist/index.d.ts",
+    "dist/pricing.js", "dist/pricing.d.ts",
+    "dist/types.js", "dist/types.d.ts",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "tsc -p tsconfig.json && node --test dist",
+    "test": "tsc -p tsconfig.json && node --test dist/*.test.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "prepublishOnly": "npm run build"
   },
   "keywords": ["llm", "finops", "cost", "openai", "anthropic", "token", "attribution", "observability"],
   "license": "MIT",
-  "homepage": "https://github.com/USER/tokenlens",
+  "homepage": "https://github.com/jaydendufour-maker/tokenlens",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/USER/tokenlens.git",
+    "url": "git+https://github.com/jaydendufour-maker/tokenlens.git",
     "directory": "packages/sdk"
   },
   "bugs": {
-    "url": "https://github.com/USER/tokenlens/issues"
+    "url": "https://github.com/jaydendufour-maker/tokenlens/issues"
   },
   "publishConfig": {
     "access": "public"

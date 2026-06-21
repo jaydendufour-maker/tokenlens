@@ -34,13 +34,11 @@ function periodStart(period: string): Date {
 function authorized(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false; // niet geconfigureerd → dicht
-  const url = new URL(req.url);
-  const fromQuery = url.searchParams.get("token");
   const fromHeader = (req.headers.get("authorization") ?? "").replace(
     /^Bearer\s+/i,
     ""
   );
-  return fromQuery === secret || fromHeader === secret;
+  return fromHeader === secret;
 }
 
 async function run(req: NextRequest) {
@@ -62,6 +60,7 @@ async function run(req: NextRequest) {
 
   let checked = 0;
   let triggered = 0;
+  let deliveryFailed = 0;
 
   for (const a of alerts ?? []) {
     checked++;
@@ -98,8 +97,13 @@ async function run(req: NextRequest) {
       thresholdUsd: Number(a.threshold_usd),
     };
 
-    if (a.webhook_url) await sendWebhook(a.webhook_url, payload);
-    if (a.notify_email) await sendAlertEmail(a.notify_email, payload);
+    const deliveries: boolean[] = [];
+    if (a.webhook_url) deliveries.push(await sendWebhook(a.webhook_url, payload));
+    if (a.notify_email) deliveries.push(await sendAlertEmail(a.notify_email, payload));
+    if (deliveries.length === 0 || !deliveries.some(Boolean)) {
+      deliveryFailed++;
+      continue;
+    }
 
     await admin
       .from("budget_alerts")
@@ -109,7 +113,7 @@ async function run(req: NextRequest) {
     triggered++;
   }
 
-  return NextResponse.json({ ok: true, checked, triggered });
+  return NextResponse.json({ ok: true, checked, triggered, deliveryFailed });
 }
 
 export const GET = run;

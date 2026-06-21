@@ -20,9 +20,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/USER/tokenlens"
-Repository = "https://github.com/USER/tokenlens"
-Issues = "https://github.com/USER/tokenlens/issues"
+Homepage = "https://github.com/jaydendufour-maker/tokenlens"
+Repository = "https://github.com/jaydendufour-maker/tokenlens"
+Issues = "https://github.com/jaydendufour-maker/tokenlens/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tokenlens"]

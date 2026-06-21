@@ -4,19 +4,17 @@ Product is built and live on https://agentauditor-jd.duckdns.org. The remaining
 work is **distribution** — the research flagged review/launch velocity as the
 kill-factor, not the product. This is the execution order.
 
-Copy lives in `launch/`. Replace every `<GITHUB_URL>` / `<SITE_URL>` placeholder
-before posting.
+Copy lives in `launch/`; de productie- en GitHub-URLs zijn ingevuld.
 
 ---
 
 ## Phase 0 — Pre-flight (do once, in order)
 
-- [ ] **Run migration `0006`** in Supabase SQL editor (`supabase/migrations/0006_date_range.sql`).
+- [x] **Migrations `0006`-`0008`** uitgevoerd en geverifieerd.
       Only needed for the custom date-range; presets/export already work without it.
-- [ ] **Pick the public GitHub repo name** and create it (public).
-      Then set `NEXT_PUBLIC_GITHUB_URL` in the VM `.env` and `./deploy-vm.sh` so the
-      site links resolve. Push the repo: `git push -u origin tokenlens-launch-ready`
-      (or merge to `main` first).
+- [x] **Public GitHub repo created:**
+      `https://github.com/jaydendufour-maker/tokenlens`.
+- [ ] Push verified `main`, enable private vulnerability reporting and confirm CI.
 - [ ] **(Optional) custom domain** (~$10) → custom SMTP → emails out of spam.
 - [ ] **Resend key** in VM `.env` (`RESEND_API_KEY`) so budget-alert emails fire
       (no-op without it — webhooks still work).
@@ -63,11 +61,12 @@ Order matters. Space them out; never cross-post the same hour.
 
 | Item | Why |
 |---|---|
-| Create GitHub repo + push | needs your account |
+| Supabase service-role key | current VM key returns 401; rotate/copy in dashboard |
 | npm + PyPI publish | needs your registry accounts |
-| Run migration 0006 | needs Supabase dashboard access |
+| Run migrations 0006-0008 | completed 2026-06-21 via Management API |
 | Post to HN/Reddit/X | needs your accounts + can't be botted (= instant ban) |
 | Payment accounts (NOWPayments/LemonSqueezy) | see `tokenlens-live` memory / `LAUNCH.md` §5 |
+| npm + PyPI publish | package names are free; both registries still require login |
 
 ## What I (JARVIS) can still do autonomously
 
