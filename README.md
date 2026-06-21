@@ -42,7 +42,7 @@ De publieke + SEO-pagina's werken óók zonder Supabase; alleen dashboard/login 
 ```
 
 ## Status
-**Live** op de GCP-VM (publieke site + SEO-motor). Supabase is gekoppeld; vóór
-publieke launch worden de service-role key en migraties 0006-0007 nog geverifieerd.
+**Live** op de GCP-VM (publieke site + SEO-motor). Supabase is gekoppeld, de
+service-role is live geverifieerd en migraties 0001-0008 zijn toegepast.
 
 GitHub: https://github.com/jaydendufour-maker/tokenlens
