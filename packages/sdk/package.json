@@ -12,9 +12,12 @@
     }
   },
   "files": [
-    "dist/index.js", "dist/index.d.ts",
-    "dist/pricing.js", "dist/pricing.d.ts",
-    "dist/types.js", "dist/types.d.ts",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/pricing.js",
+    "dist/pricing.d.ts",
+    "dist/types.js",
+    "dist/types.d.ts",
     "README.md"
   ],
   "scripts": {
@@ -23,7 +26,16 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["llm", "finops", "cost", "openai", "anthropic", "token", "attribution", "observability"],
+  "keywords": [
+    "llm",
+    "finops",
+    "cost",
+    "openai",
+    "anthropic",
+    "token",
+    "attribution",
+    "observability"
+  ],
   "license": "MIT",
   "homepage": "https://github.com/jaydendufour-maker/tokenlens",
   "repository": {
@@ -38,6 +50,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/node": "^20.19.43",
     "typescript": "^5.5.0"
   }
 }
