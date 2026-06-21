@@ -15,7 +15,8 @@ Copy lives in `launch/`; de productie- en GitHub-URLs zijn ingevuld.
 - [x] **Public GitHub repo created:**
       `https://github.com/jaydendufour-maker/tokenlens`.
 - [x] Verified `main` pushed to the public repo without force/history rewrite.
-- [ ] Enable private vulnerability reporting and confirm CI.
+- [x] Private vulnerability reporting + dependency/security alerts enabled;
+      `main` CI and CodeQL confirmed green.
 - [ ] **(Optional) custom domain** (~$10) → custom SMTP → emails out of spam.
 - [ ] **Resend key** in VM `.env` (`RESEND_API_KEY`) so budget-alert emails fire
       (no-op without it — webhooks still work).
